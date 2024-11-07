@@ -3,34 +3,29 @@
 
 <head>
 <meta charset="utf-8">
-<title>ICH Analyzer</title>
+<title>TBI Analyzer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Use the power of Machine Learning to automatically detect intracranial hemorrhages on brain ct images.">
+<meta name="description" content="Use the power of Machine Learning to automatically detect traumatic brain injuries on CT images.">
 
-
-<!--Code to prevent the browser from caching the page-->
+<!-- Code to prevent caching -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
 <meta http-equiv="Expires" content="0"/>
 
 
-
-
-
-<!--CSS Stylesheets-->
+<!-- CSS Stylesheets -->
 <link rel="stylesheet" href="css/w3.css">
 <link rel="stylesheet" href="css/brain.css">
 
-<!--Link to Font Awesome icons-->
+<!-- Font Awesome Icons -->
 <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.4.2/css/all.css' integrity='sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns' crossorigin='anonymous'>
 
-<!--Link to fonts from google fonts-->
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css?family=Oswald:300" rel="stylesheet">
 
-
 <link rel="shortcut icon" type="image/png" href="robotfavicon.png">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 
 
 <style>
@@ -61,17 +56,42 @@ html,body,h2,h3,h4 {font-family: Helvetica, sans-serif}
 	left: 0px; /* Refers to the div tag. */
 	z-index: 101;
 }
-/* We wrap the absolute camnvas inside a relative div element
-so that the canvas acts responsively, because the div is response.
+.severity-box {
+    text-align: center;
+    margin-top: 30px;
+}
+.severity-score {
+    font-size: 2em;
+    font-weight: bold;
+    color: #03083b;
+    background-color: #ecf0f1;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* We wrap the absolute canvas inside a relative div element
+so that the canvas acts responsively, because the div is responsive.
 This div is positioned relative so it will act as an anchor for the
 canvas elements which are positioned absolute.*/
 .mycontainer {
 	position: relative;
-	/*background: red;  Uncomment this to see the div container.*/
-	height: 280px;
-	width: 330px;
+	top: 0px;
+	left: 0px;
+	z-index: 100;
+	height: 250px;
+	width: 250px;
 }
-	
+
+/* Background wallpaper */
+body {
+    background-image: url("./assets/bg.png");
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
 </style>
 
 </head>
@@ -83,24 +103,33 @@ canvas elements which are positioned absolute.*/
 
 <!-- w3-content defines a container for fixed size centered content,
 and is wrapped around the whole page content. -->
-<div class="w3-content card" style="max-width:960px">
+<div class="w3-content card" style="max-width:1000px">
 
 
 
 <!-- 1. HOME PAGE TAB -->
-<div class="tabbed w3-animate-opacity w3-white" id="home">
+<div class="tabbed w3-animate-opacity w3-pale-blue" id="home">
 
 
 
-<!-- Header -->
-<div class="w3-center title adjust-fontcolor logo">
-	
-  <h1 class="space-letters w3-text-purple"></i><b>Intracranial Hemorrhage<br> Analyzer</b></h1>
-  
-  
-  <h5 class="space-letters tag-font w3-text-red"><b>powered by<br> Artificial Intelligence</b></h5>
-</div>
+	<div class="w3-center title adjust-fontcolor logo">
+		<h1 class="space-letters w3-text-black"><b>Traumatic Brain Injury Analyzer</b></h1>
+		<h5 class="space-letters tag-font w3-text-red"><b>powered by Machine Learning</b></h5>
+		<p class="w3-text-gray" style="font-size: 1.1em; color: #34495e; font-family: 'Helvetica', sans-serif; line-height: 1.6;">
+			This tool leverages AI to assist in identifying traumatic brain injuries in CT scans, providing quick and reliable insights for healthcare professionals. Use it to improve early detection and enhance patient outcomes.
+		</p>
+	</div>
 
+
+	<!-- Instructions -->
+	<div class="instructions w3-pale-yellow">
+		<h3>Instructions:</h3>
+		<ol>
+			<li><b>Upload a Brain CT Image:</b> Click on the "Submit a Brain CT Image" button and select a CT scan image.</li>
+			<li><b>View Results:</b> The model will analyze the image and display a severity score and visual overlays.</li>
+			<li><b>Interpret Score:</b> Use the severity score to assess potential injury. Consult with a healthcare provider for further interpretation.</li>
+		</ol>
+	</div>
 
 
 
@@ -153,6 +182,17 @@ and is wrapped around the whole page content. -->
 	
 	</div>
 	
+	<!-- Display severity score -->
+	<div class="severity-box">
+        <div id="severity-score" class="severity-score">Severity Score: <span>Loading...</span></div>
+    </div>
+	<div id="analysis" class="analysis w3-pale-blue" style="display:none; padding: 20px; border-radius: 8px; margin-top: 20px;">
+		<h2 class="analysis-title" style="color: #2c3e50; font-weight: bold; font-family: 'Oswald', sans-serif;">Analysis</h2>
+		<p id="analysis-text" style="font-size: 1.1em; color: #34495e; font-family: 'Helvetica', sans-serif; line-height: 1.6;">
+			Based on the severity score, this section will provide additional insights and recommendations.
+		</p>
+	</div>
+	
 	
 	</div>
 
@@ -166,31 +206,18 @@ and is wrapped around the whole page content. -->
 	<div class="progress-bar w3-text-teal">Model is loading...</div>
 </div>
 
-
-<div class="w3-center add-padding w3-border add-margin side-margin w3-round w3-pale-blue">
 		
 	<h5 class='new-font'></h5>
 	<ol class='w3-left-align' id='prediction-list'></ol>
 		
-</div>
 
 
 <!-- Button -->
 <div id="btnn" class="w3-center bottom-padding">
 	
-	<button class="w3-btn w3-purple w3-round w3-margin-bottom adjust-spacing w3-hover-red btn-font w3-padding w3-space-letters w3-card-4" onclick="setTimeout(simulateClick.bind(null, 'image-selector'), 200)"></i><b>Submit a Brain Window CT Image</b></button>
-	<p class="w3-text-teal">jpeg or png</p>
+	<button class="w3-btn w3-red w3-round w3-margin-bottom adjust-spacing w3-hover-black btn-font w3-padding w3-space-letters w3-card-4" onclick="setTimeout(simulateClick.bind(null, 'image-selector'), 200)"></i><b>Submit a Brain CT Image</b></button>
 </div> 
 
-
-
-
-
-
-
-<div class='w3-padding'>
-	<p class='w3-round w3-margin w3-margin-bottom w3-text-teal'>Please Note: This is a prototype.</p>
-</div>
 
 
 </div><!--END OF HOME PAGE TAB-->
